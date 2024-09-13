@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbuz Perdun</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+        #gameArea {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #shop, #leaderboard, #dailyTasks {
+            margin-top: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 10px;
+            width: 80%;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <h1>Arbuz Perdun</h1>
+        <div id="loadingMessage">Loading...</div>
+        <button id="tapButton" style="display: none;">👆 Tap Me!</button>
+        <div id="stats" style="display: none;">
+            <p>Taps: <span id="tapCount">0</span></p>
+            <p>Taps per second: <span id="tapsPerSecond">0</span></p>
+        </div>
+    </div>
+    
+    <div id="dailyTasks" style="display: none;">
+        <h2>Ежедневные задания</h2>
+        <ul id="taskList"></ul>
+    </div>
+    
+    <div id="shop" style="display: none;">
+        <h2>Магазин улучшений</h2>
+        <ul id="upgradeList"></ul>
+    </div>
+    
+    <div id="leaderboard" style="display: none;">
+        <h2>Таблица лидеров</h2>
+        <ol id="leaderboardList"></ol>
+    </div>
+
+    <script>
+        let taps = 0;
+        let tapsPerSecond = 0;
+        let upgrades = [];
+        let dailyTasks = [];
+        let leaderboard = [];
+
+        $(document).ready(function() {
+            $('#loadingMessage').hide();
+            $('#tapButton, #stats, #shop, #dailyTasks, #leaderboard').show();
+            
+            loadGame();
+            initializeUpgrades();
+            initializeDailyTasks();
+            updateLeaderboard();
+            
+            setInterval(autoTap, 1000);
+            setInterval(saveGame, 60000);
+        });
+
+        $('#tapButton').click(function() {
+            taps++;
+            updateStats();
+            checkTaskCompletion();
+        });
+
+        function autoTap() {
+            taps += tapsPerSecond;
+            updateStats();
+        }
+
+        function updateStats() {
+            $('#tapCount').text(taps);
+            $('#tapsPerSecond').text(tapsPerSecond.toFixed(1));
+        }
+
+        function initializeUpgrades() {
+            upgrades = [
+                { name: "Автоклик", cost: 10, tpsIncrease: 0.1, owned: 0 },
+                { name: "Супер палец", cost: 50, tpsIncrease: 0.5, owned: 0 },
+                { name: "Арбузный ускоритель", cost: 200, tpsIncrease: 2, owned: 0 }
+            ];
+            
+            let upgradeList = $('#upgradeList');
+            upgrades.forEach((upgrade, index) => {
+                upgradeList.append(`
+                    <li>
+                        ${upgrade.name} - Стоимость: ${upgrade.cost} тапов
+                        <button onclick="buyUpgrade(${index})">Купить</button>
+                        <span>Куплено: ${upgrade.owned}</span>
+                    </li>
+                `);
+            });
+        }
+
+        function buyUpgrade(index) {
+            let upgrade = upgrades[index];
+            if (taps >= upgrade.cost) {
+                taps -= upgrade.cost;
+                upgrade.owned++;
+                tapsPerSecond += upgrade.tpsIncrease;
+                upgrade.cost = Math.floor(upgrade.cost * 1.5);
+                updateStats();
+                updateShopDisplay();
+            } else {
+                alert("Недостаточно тапов!");
+            }
+        }
+
+        function updateShopDisplay() {
+            let upgradeList = $('#upgradeList');
+            upgradeList.empty();
+            upgrades.forEach((upgrade, index) => {
+                upgradeList.append(`
+                    <li>
+                        ${upgrade.name} - Стоимость: ${upgrade.cost} тапов
+                        <button onclick="buyUpgrade(${index})">Купить</button>
+                        <span>Куплено: ${upgrade.owned}</span>
+                    </li>
+                `);
+            });
+        }
+
+        function initializeDailyTasks() {
+            dailyTasks = [
+                { description: "Набрать 100 тапов", goal: 100, progress: 0, completed: false },
+                { description: "Купить 5 улучшений", goal: 5, progress: 0, completed: false },
+                { description: "Достичь 10 тапов в секунду", goal: 10, progress: 0, completed: false }
+            ];
+            
+            updateTaskDisplay();
+        }
+
+        function updateTaskDisplay() {
+            let taskList = $('#taskList');
+            taskList.empty();
+            dailyTasks.forEach((task, index) => {
+                taskList.append(`
+                    <li>
+                        ${task.description} - Прогресс: ${task.progress}/${task.goal}
+                        ${task.completed ? '✅' : ''}
+                    </li>
+                `);
+            });
+        }
+
+        function checkTaskCompletion() {
+            dailyTasks[0].progress = taps;
+            dailyTasks[1].progress = upgrades.reduce((sum, upgrade) => sum + upgrade.owned, 0);
+            dailyTasks[2].progress = tapsPerSecond;
+            
+            dailyTasks.forEach(task => {
+                if (task.progress >= task.goal) {
+                    task.completed = true;
+                }
+            });
+            
+            updateTaskDisplay();
+        }
+
+        function updateLeaderboard() {
+            // В реальном приложении здесь был бы запрос к серверу
+            leaderboard = [
+                { name: "Player1", score: 1000 },
+                { name: "Player2", score: 800 },
+                { name: "Player3", score: 600 },
+            ];
+            
+            let leaderboardList = $('#leaderboardList');
+            leaderboardList.empty();
+            leaderboard.forEach(player => {
+                leaderboardList.append(`<li>${player.name} - ${player.score} тапов</li>`);
+            });
+        }
+
+        function saveGame() {
+            localStorage.setItem('arbuzPerdunSave', JSON.stringify({
+                taps: taps,
+                tapsPerSecond: tapsPerSecond,
+                upgrades: upgrades,
+                dailyTasks: dailyTasks
+            }));
+        }
+
+        function loadGame() {
+            let savedGame = JSON.parse(localStorage.getItem('arbuzPerdunSave'));
+            if (savedGame) {
+                taps = savedGame.taps;
+                tapsPerSecond = savedGame.tapsPerSecond;
+                upgrades = savedGame.upgrades;
+                dailyTasks = savedGame.dailyTasks;
+                updateStats();
+                updateShopDisplay();
+                updateTaskDisplay();
+            }
+        }
+    </script>
+</body>
+</html>
