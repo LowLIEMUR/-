@@ -1,0 +1,31 @@
+<script>
+        let taps = 0;
+        const tapButton = document.getElementById('tapButton');
+        const statsElement = document.getElementById('stats');
+        const tg = window.Telegram.WebApp;
+
+        tg.expand();
+
+        tapButton.addEventListener('click', () => {
+            taps++;
+            statsElement.textContent = `Taps: ${taps}`;
+            tg.HapticFeedback.impactOccurred('medium');
+            
+            if (taps % 10 === 0) {
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+
+            // Send data to the bot
+            tg.sendData(JSON.stringify({action: 'tap', taps: taps}));
+        });
+
+        // Receive initial data from the bot
+        tg.onEvent('viewportChanged', () => {
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                let userId = tg.initDataUnsafe.user.id;
+                tg.sendData(JSON.stringify({action: 'getTaps', userId: userId}));
+            }
+        });
+</script>
+</body>
+</html>
