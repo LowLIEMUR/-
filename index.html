@@ -87,7 +87,7 @@
             updateLeaderboard();
             
             setInterval(autoTap, 1000);
-            setInterval(saveGame, 60000);
+            setInterval(saveGame, 5000);  // Save game every 5 seconds
         });
 
         $('#tapButton').click(function() {
@@ -113,16 +113,7 @@
                 { name: "Арбузный ускоритель", cost: 200, tpsIncrease: 2, owned: 0 }
             ];
             
-            let upgradeList = $('#upgradeList');
-            upgrades.forEach((upgrade, index) => {
-                upgradeList.append(`
-                    <li>
-                        ${upgrade.name} - Стоимость: ${upgrade.cost} тапов
-                        <button onclick="buyUpgrade(${index})">Купить</button>
-                        <span>Куплено: ${upgrade.owned}</span>
-                    </li>
-                `);
-            });
+            updateShopDisplay();
         }
 
         function buyUpgrade(index) {
@@ -206,24 +197,32 @@
         }
 
         function saveGame() {
-            localStorage.setItem('arbuzPerdunSave', JSON.stringify({
-                taps: taps,
-                tapsPerSecond: tapsPerSecond,
-                upgrades: upgrades,
-                dailyTasks: dailyTasks
-            }));
+            let gameState = {
+                t: taps,
+                tps: tapsPerSecond,
+                u: upgrades.map(u => u.owned),
+                dt: dailyTasks.map(t => t.completed ? 1 : 0)
+            };
+            let stateStr = btoa(JSON.stringify(gameState));
+            window.history.replaceState({}, '', `?state=${stateStr}`);
         }
 
         function loadGame() {
-            let savedGame = JSON.parse(localStorage.getItem('arbuzPerdunSave'));
-            if (savedGame) {
-                taps = savedGame.taps;
-                tapsPerSecond = savedGame.tapsPerSecond;
-                upgrades = savedGame.upgrades;
-                dailyTasks = savedGame.dailyTasks;
-                updateStats();
-                updateShopDisplay();
-                updateTaskDisplay();
+            let urlParams = new URLSearchParams(window.location.search);
+            let stateStr = urlParams.get('state');
+            if (stateStr) {
+                try {
+                    let gameState = JSON.parse(atob(stateStr));
+                    taps = gameState.t;
+                    tapsPerSecond = gameState.tps;
+                    upgrades.forEach((u, i) => u.owned = gameState.u[i]);
+                    dailyTasks.forEach((t, i) => t.completed = gameState.dt[i] === 1);
+                    updateStats();
+                    updateShopDisplay();
+                    updateTaskDisplay();
+                } catch (e) {
+                    console.error("Failed to load game state:", e);
+                }
             }
         }
     </script>
