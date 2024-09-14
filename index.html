@@ -108,7 +108,7 @@
         }
         function sendTapsToBot() {
         $.ajax({
-        url: 'https://your-server-url.com/update_taps', // URL вашего сервера
+        url: 'mongodb://localhost:27017/?authMechanism=DEFAULT', // URL вашего сервера
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ taps: taps }),
