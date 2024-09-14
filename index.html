@@ -144,8 +144,9 @@
         },
         error: function(error) {
             console.error('Error loading taps from bot:', error);
+                }
+            });
         }
-        });
         function buyUpgrade(index) {
             let upgrade = upgrades[index];
             if (taps >= upgrade.cost) {
@@ -267,8 +268,9 @@
             },
             error: function(error) {
             console.error('Error loading game state:', error);
+                    }
+                });
             }
-        });
     </script>
 </body>
 </html>
