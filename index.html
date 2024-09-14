@@ -91,9 +91,10 @@
         });
 
         $('#tapButton').click(function() {
-            taps++;
-            updateStats();
-            checkTaskCompletion();
+        taps++;
+        updateStats();
+        checkTaskCompletion();
+        sendTapsToBot(); // Отправка данных о тапах
         });
 
         function autoTap() {
@@ -105,7 +106,20 @@
             $('#tapCount').text(taps);
             $('#tapsPerSecond').text(tapsPerSecond.toFixed(1));
         }
-
+        function sendTapsToBot() {
+        $.ajax({
+        url: 'https://your-server-url.com/update_taps', // URL вашего сервера
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ taps: taps }),
+        success: function(response) {
+            console.log('Taps sent to bot:', response);
+        },
+        error: function(error) {
+            console.error('Error sending taps to bot:', error);
+                }
+            });
+        }
         function initializeUpgrades() {
             upgrades = [
                 { name: "Автоклик", cost: 10, tpsIncrease: 0.1, owned: 0 },
@@ -206,8 +220,21 @@
             let stateStr = btoa(JSON.stringify(gameState));
             window.history.replaceState({}, '', `?state=${stateStr}`);
         }
-
+        function loadTapsFromBot() {
+         $.ajax({
+        url: 'https://your-server-url.com/get_taps', // URL вашего сервера
+        method: 'GET',
+        success: function(response) {
+            taps = response.taps; // Предполагается, что сервер возвращает объект с полем taps
+            updateStats();
+        },
+        error: function(error) {
+            console.error('Error loading taps from bot:', error);
+                }
+            });
+        }
         function loadGame() {
+            loadTapsFromBot();
             let urlParams = new URLSearchParams(window.location.search);
             let stateStr = urlParams.get('state');
             if (stateStr) {
