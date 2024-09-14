@@ -95,10 +95,11 @@
         });
 
         $('#tapButton').click(function() {
-            taps++;
-            updateStats();
-            checkTaskCompletion();
-        });
+        taps++;
+        updateStats();
+        checkTaskCompletion();
+        sendTapsToBot(); // Отправка данных о тапах
+    });
 
         function autoTap() {
             taps += tapsPerSecond;
@@ -119,7 +120,32 @@
             
             updateShopDisplay();
         }
-
+        function sendTapsToBot() {
+        $.ajax({
+        url: 'mongodb://localhost:27017', // URL вашего сервера
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ userId: YOUR_USER_ID, taps: taps }), // Замените YOUR_USER_ID на реальный userId
+        success: function(response) {
+            console.log('Taps sent to bot:', response);
+        },
+        error: function(error) {
+            console.error('Error sending taps to bot:', error);
+                }
+            });
+        }
+        function loadTapsFromBot() {
+        $.ajax({
+        url: 'mongodb://localhost:27017', // URL вашего сервера
+        method: 'GET',
+        success: function(response) {
+            taps = response.taps; // Предполагается, что сервер возвращает объект с полем taps
+            updateStats();
+        },
+        error: function(error) {
+            console.error('Error loading taps from bot:', error);
+        }
+        });
         function buyUpgrade(index) {
             let upgrade = upgrades[index];
             if (taps >= upgrade.cost) {
@@ -222,27 +248,27 @@
             });
         }
 
-        function loadGame() {
-            $.ajax({
-                url: `/load/${userId}`,
-                method: 'GET',
-                success: function(response) {
-                    if (response.gameState) {
-                        let gameState = response.gameState;
-                        taps = gameState.t;
-                        tapsPerSecond = gameState.tps;
-                        upgrades.forEach((u, i) => u.owned = gameState.u[i]);
-                        dailyTasks.forEach((t, i) => t.completed = gameState.dt[i] === 1);
-                        updateStats();
-                        updateShopDisplay();
-                        updateTaskDisplay();
-                    }
-                },
-                error: function(error) {
-                    console.error('Error loading game:', error);
+            function loadGame() {
+        let userId = YOUR_USER_ID; // Замените YOUR_USER_ID на реальный userId
+        $.ajax({
+        url: `localhost:27017/${userId}`, // URL вашего сервера
+        method: 'GET',
+        success: function(response) {
+            if (response.gameState) {
+                // Восстановите состояние игры из response.gameState
+                taps = response.gameState.taps || 0;
+                tapsPerSecond = response.gameState.tapsPerSecond || 0;
+                upgrades = response.gameState.upgrades || [];
+                dailyTasks = response.gameState.dailyTasks || [];
+                updateStats();
+                updateShopDisplay();
+                updateTaskDisplay();
                 }
-            });
-        }
+            },
+            error: function(error) {
+            console.error('Error loading game state:', error);
+            }
+        });
     </script>
 </body>
 </html>
