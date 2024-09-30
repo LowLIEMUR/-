@@ -1,71 +1,16 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';">
     <title>Arbuz Perdun</title>
-    <link rel="stylesheet" href="https://your-domain.com/styles.css">
-    <script src="https://your-domain.com/script.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f0f0f0;
-        }
-        #gameArea {
-            text-align: center;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        #arbuz {
-            font-size: 100px;
-            cursor: pointer;
-            user-select: none;
-        }
-        .section {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            width: 80%;
-            max-width: 500px;
-        }
-        .hidden {
-            display: none;
-        }
-        button {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            margin-bottom: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="gameArea">
+    <div id="loadingMessage">Loading...</div>
+
+    <div id="gameArea" class="hidden">
         <h1>Arbuz Perdun</h1>
-        <div id="loadingMessage">Loading...</div>
         <div id="arbuz">🍉</div>
         <div id="stats">
             <p>Taps: <span id="tapCount">0</span></p>
@@ -74,32 +19,27 @@
     </div>
 
     <div id="shop" class="section hidden">
-        <h2>Магазин улучшений</h2>
-        <ul id="upgradesList">
-            <!-- Upgrades will be added here dynamically -->
-        </ul>
+        <h2>Upgrade Shop</h2>
+        <ul id="upgradesList"></ul>
     </div>
 
     <div id="dailyTasks" class="section hidden">
-        <h2>Ежедневные задания</h2>
-        <ul id="tasksList">
-            <!-- Daily tasks will be added here dynamically -->
-        </ul>
+        <h2>Daily Tasks</h2>
+        <ul id="tasksList"></ul>
     </div>
 
     <div id="leaderboard" class="section hidden">
-        <h2>Таблица лидеров</h2>
-        <ul id="leaderboardList">
-            <!-- Leaderboard entries will be added here dynamically -->
-        </ul>
+        <h2>Leaderboard</h2>
+        <ul id="leaderboardList"></ul>
     </div>
 
     <div id="navigation">
-        <button id="showShop">Магазин</button>
-        <button id="showTasks">Задания</button>
-        <button id="showLeaderboard">Таблица лидеров</button>
+        <button data-section="gameArea">Game</button>
+        <button data-section="shop">Shop</button>
+        <button data-section="dailyTasks">Tasks</button>
+        <button data-section="leaderboard">Leaderboard</button>
     </div>
 
-    <script src="game.js"></script>
+    <script src="arbuz.js"></script>
 </body>
 </html>
