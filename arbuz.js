@@ -13,6 +13,7 @@ const UPGRADE_EFFECTS = {
 
 document.addEventListener('DOMContentLoaded', () => {
     userId = getUserIdFromUrl();
+    console.log('User ID:', userId);
     if (userId) {
         initializeGame();
     } else {
@@ -56,14 +57,22 @@ function handleTap() {
 }
 
 async function loadUserData() {
-    const response = await fetch(`/get_user_data?userId=${userId}`);
-    if (!response.ok) throw new Error('Failed to load user data');
-    const data = await response.json();
-    taps = data.taps || 0;
-    upgrades = data.upgrades || {};
-    dailyTasks = data.dailyTasks || [];
-    calculateTapsPerSecond();
-    updateDisplay();
+    try {
+        const response = await fetch(`/get_user_data?userId=${userId}`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+        const data = await response.json();
+        taps = data.taps || 0;
+        upgrades = data.upgrades || {};
+        dailyTasks = data.dailyTasks || [];
+        calculateTapsPerSecond();
+        updateDisplay();
+    } catch (error) {
+        console.error('Error loading user data:', error);
+        throw error; // Re-throw the error to be caught by the caller
+    }
 }
 
 async function updateUserData() {
